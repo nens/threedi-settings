@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from configparser import ConfigParser
 import functools
+from pathlib import Path
 import logging
 from typing import Dict, List
 
@@ -24,6 +25,14 @@ from threedi_settings.mappings import (
 )
 
 logger = logging.getLogger(__name__)
+import os
+
+
+api_config = {
+    "API_HOST": "http://localhost:8000/v3.0",
+    "API_USERNAME": os.environ.get("API_USERNAME"),
+    "API_PASSWORD": os.environ.get("API_PASSWORD")
+}
 
 
 class OpenApiSimulationClient:
@@ -31,7 +40,7 @@ class OpenApiSimulationClient:
         self, simulation_id: int
     ):
         self.simulation_id = simulation_id
-        _api_client = ThreediApiClient()
+        _api_client = ThreediApiClient(config=api_config)
         self.api_client = SimulationsApi(_api_client)
 
 
@@ -48,7 +57,7 @@ class BaseOpenAPI(ABC, OpenApiSimulationClient):
     def instance(self):
         data = {}
         exclude = {
-            "url",
+            "url", "id",
         }
         for name in self.model.openapi_types.keys():
             if name.lower() in exclude:
@@ -215,15 +224,14 @@ class OpenAPISimulationSettings(OpenApiSimulationClient):
             return
 
 
-from pathlib import Path
-
-
 class OpenAPISimulationSettingsWriter(OpenAPISimulationSettings):
 
-    def __init__(self, simulation_id, file_path: Path):
+    def __init__(self, simulation_id, ini_file_path: Path, aggregation_file_path: Path):
         super().__init__(simulation_id)
         self.config = ConfigParser()
-        self.output_file = file_path
+        self.aggr_config = ConfigParser()
+        self.ini_output_file = ini_file_path
+        self.aggregation_file_path = aggregation_file_path
 
     @functools.cached_property
     def settings(self):
@@ -239,8 +247,14 @@ class OpenAPISimulationSettingsWriter(OpenAPISimulationSettings):
         self._add(general_settings_map, self.settings.general_settings)
         self._add(time_step_settings_map, self.settings.time_step_settings)
         self._add(numerical_settings_map, self.settings.numerical_settings)
-        with self.output_file.open("w") as configfile:
+        with self.ini_output_file.open("w") as configfile:
             self.config.write(configfile)
+        if not self.settings.aggregation_settings:
+            logger.debug("No aggregation settings defined for simulation %s ", self.simulation_id)
+            return
+        self._add_aggregations()
+        with self.aggregation_file_path.open("w") as aggregation_file:
+            self.aggr_config.write(aggregation_file)
 
     def _add(self, settings_map: Dict, sub_setting):
         for attr_name, mapping in settings_map.items():
@@ -249,3 +263,12 @@ class OpenAPISimulationSettingsWriter(OpenAPISimulationSettings):
             if old_field_info.ini_section not in self.config:
                 self.config[old_field_info.ini_section] = {}
             self.config[old_field_info.ini_section][old_field_info.name] = f"{value}"
+
+    def _add_aggregations(self):
+        for i, entry in enumerate(self.settings.aggregation_settings, start=1):
+            for attr_name, mapping in aggregation_settings_map.items():
+                value = getattr(entry, attr_name)
+                old_field_info, _ = mapping
+                if str(i) not in self.aggr_config:
+                    self.aggr_config[str(i)] = {}
+                self.aggr_config[str(i)][old_field_info.name] = f"{value}"
