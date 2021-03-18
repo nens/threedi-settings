@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from configparser import ConfigParser
 import functools
 import logging
 from typing import Dict, List
@@ -13,7 +14,7 @@ from openapi_client.models import AggregationSettings
 from openapi_client import SimulationsApi
 from openapi_client import ApiException
 from threedi_api_client import ThreediApiClient
-
+from openapi_client.models import SimulationSettingsOverview
 
 from threedi_settings.mappings import (
     general_settings_map,
@@ -25,16 +26,23 @@ from threedi_settings.mappings import (
 logger = logging.getLogger(__name__)
 
 
-class BaseOpenAPI(ABC):
+class OpenApiSimulationClient:
+    def __init__(
+        self, simulation_id: int
+    ):
+        self.simulation_id = simulation_id
+        _api_client = ThreediApiClient()
+        self.api_client = SimulationsApi(_api_client)
+
+
+class BaseOpenAPI(ABC, OpenApiSimulationClient):
     def __init__(
         self, simulation_id: int, config_dict, openapi_model, mapping
     ):
-        self.simulation_id = simulation_id
+        super().__init__(simulation_id)
         self.config_dict = config_dict
         self.model = openapi_model
         self.mapping = mapping
-        _api_client = ThreediApiClient()
-        self.api_client = SimulationsApi(_api_client)
 
     @functools.cached_property
     def instance(self):
@@ -125,14 +133,12 @@ class OpenAPINumericalSettings(BaseOpenAPI):
         return "simulations_settings_numerical_create"
 
 
-class OpenAPIAggregationSettings:
+class OpenAPIAggregationSettings(OpenApiSimulationClient):
     def __init__(self, simulation_id: int, config: Dict):
-        self.simulation_id = simulation_id
+        super().__init__(simulation_id)
         self.config_dict = config
         self.model = AggregationSettings
         self.mapping = aggregation_settings_map
-        _api_client = ThreediApiClient()
-        self.api_client = SimulationsApi(_api_client)
 
     @property
     def create_method_name(self):
@@ -194,3 +200,52 @@ class OpenAPIAggregationSettings:
             )
             responses.append(resp)
         return responses
+
+
+class OpenAPISimulationSettings(OpenApiSimulationClient):
+
+    def __init__(self, simulation_id):
+        super().__init__(simulation_id)
+
+    def retrieve(self) -> SimulationSettingsOverview:
+        try:
+            return self.api_client.simulations_settings_overview(self.simulation_id)
+        except ApiException as err:
+            logger.error("Could not retrieve settings information for simulation %s", self.simulation_id)
+            return
+
+
+from pathlib import Path
+
+
+class OpenAPISimulationSettingsWriter(OpenAPISimulationSettings):
+
+    def __init__(self, simulation_id, file_path: Path):
+        super().__init__(simulation_id)
+        self.config = ConfigParser()
+        self.output_file = file_path
+
+    @functools.cached_property
+    def settings(self):
+        resp = self.retrieve()
+        if not resp:
+            return
+        return resp
+
+    def to_ini(self):
+        if not self.settings:
+            logger.error("Cannot create ini file, could not fetch data from API")
+            return
+        self._add(general_settings_map, self.settings.general_settings)
+        self._add(time_step_settings_map, self.settings.time_step_settings)
+        self._add(numerical_settings_map, self.settings.numerical_settings)
+        with self.output_file.open("w") as configfile:
+            self.config.write(configfile)
+
+    def _add(self, settings_map: Dict, sub_setting):
+        for attr_name, mapping in settings_map.items():
+            value = getattr(sub_setting, attr_name)
+            old_field_info, _ = mapping
+            if old_field_info.ini_section not in self.config:
+                self.config[old_field_info.ini_section] = {}
+            self.config[old_field_info.ini_section][old_field_info.name] = f"{value}"
