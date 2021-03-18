@@ -26,6 +26,33 @@ class ThreedimodelIni:
         self.config = ConfigParser()
         with open(self.config_file, "r") as ini_file:
             self.config.read_file(ini_file)
+
+    @property
+    def model_root(self) -> Path:
+        return self.config_file.parent
+
+    def as_dict(self) -> Dict:
+        d = {}
+        sections = self.config.sections()
+
+        for section in sections:
+            options = self.config.options(section)
+            for option in options:
+                d[option] = self.config.get(section, option)
+        return d
+
+
+class AggregationIni(ThreedimodelIni):
+    """
+    Physical schema that describes how the model data is
+    represented and stored
+    """
+
+    def __init__(self, config_file: Path):
+        """
+        :param config_file: configuration ini file
+        """
+        super().__init__(config_file=config_file)
         self.aggregation = ConfigParser()
         if self.aggregation_ini:
             with open(self.aggregation_ini, "r") as aggr_file:
@@ -42,14 +69,17 @@ class ThreedimodelIni:
         return self.config_file.parent
 
     def as_dict(self) -> Dict:
-        d = {}
-        sections = self.config.sections()
+        sections_dict = {}
+
+        # get sections and iterate over each
+        sections = self.aggregation.sections()
 
         for section in sections:
-            options = self.config.options(section)
+            options = self.aggregation.options(section)
+            temp_dict = {}
             for option in options:
-                d[option] = self.config.get(section, option)
-        return d
+                temp_dict[option] = self.aggregation.get(section, option)
 
-    def aggreagtion_as_dict(self):
-        pass
+            sections_dict[section] = temp_dict
+
+        return sections_dict

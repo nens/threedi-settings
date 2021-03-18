@@ -62,9 +62,6 @@ time_step_settings_map = {
 
 # old -> new
 numerical_settings_map = {
-    # "flow_variable": [FieldInfoOld("flow_variable", str), FieldInfoNew("flow_variable", str, None)],
-    # "aggregation_method": [FieldInfoOld("aggregation_method", str), FieldInfoNew("method", str, None)],
-    # "timestep": [FieldInfoOld("timestep", float), FieldInfoNew("interval", float, None)],
     "cfl_strictness_factor_1d": [
         FieldInfoOld("cfl_strictness_factor_1d", float),
         FieldInfoNew(
@@ -177,6 +174,23 @@ numerical_settings_map = {
         FieldInfoNew("flooding_threshold", float, 0.000001, NumericalSettings),
     ],
 }
+
+aggregation_settings_map = {
+    "flow_variable": [FieldInfoOld("flow_variable", str), FieldInfoNew("flow_variable", str, None, AggregationSettings)],
+    "method": [FieldInfoOld("aggregation_method", str), FieldInfoNew("method", str, None, AggregationSettings)],
+    "interval": [FieldInfoOld("timestep", float), FieldInfoNew("interval", float, None, AggregationSettings)],
+}
+
+# aggregation_methods_map = {
+#     "avg": "avg",
+#     "min": "min",
+#     "max": "max",
+#     "cum": "cum",
+#     "cum_negative": "cumulative_negative",
+#     "cum_positive": "cumulative_positive",
+#     "current": "current",
+# }
+
 
 settings_map = {
     **general_settings_map,
