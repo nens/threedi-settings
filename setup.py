@@ -10,9 +10,7 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [
-    'threedi-api-client'
-]
+requirements = []
 
 cmd_requirements = [
     'typer>=0.3.2'
@@ -56,6 +54,6 @@ setup(
         'api': api_requirements
     },
     url='https://github.com/nens/threedi_settings',
-    version='0.1.3',
+    version='0.0.1',
     zip_safe=False,
 )
