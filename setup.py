@@ -53,7 +53,7 @@ setup(
         'cmd': cmd_requirements,
         'api': api_requirements
     },
-    url='https://github.com/nens/threedi_settings',
+    url='https://github.com/nens/threedi-settings',
     version='0.0.1',
     zip_safe=False,
 )
