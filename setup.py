@@ -17,6 +17,11 @@ requirements = [
 cmd_requirements = [
     'typer>=0.3.2'
 ]
+
+api_requirements = [
+    'threedi-api-client>3.0.23'
+]
+
 setup_requirements = ['pytest-runner', ]
 
 test_requirements = ['pytest>=3', ]
@@ -47,9 +52,10 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     extras_require={
-        'cmd': cmd_requirements
+        'cmd': cmd_requirements,
+        'api': api_requirements
     },
     url='https://github.com/nens/threedi_settings',
-    version='0.1.1',
+    version='0.1.3',
     zip_safe=False,
 )

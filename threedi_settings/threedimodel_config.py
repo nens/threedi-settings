@@ -31,13 +31,18 @@ class ThreedimodelIni:
     def model_root(self) -> Path:
         return self.config_file.parent
 
-    def as_dict(self) -> Dict:
+    def as_dict(self, flat: bool = True) -> Dict:
         d = {}
         sections = self.config.sections()
 
         for section in sections:
             options = self.config.options(section)
+            temp_dict = {}
             for option in options:
+                if not flat:
+                    temp_dict[option] = self.config.get(section, option)
+                    d[section] = temp_dict
+                    continue
                 d[option] = self.config.get(section, option)
         return d
 

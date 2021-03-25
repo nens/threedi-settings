@@ -6,16 +6,20 @@ from configparser import ConfigParser
 import functools
 from pathlib import Path
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional
 
-from openapi_client.models import GeneralSettings
-from openapi_client.models import TimeStepSettings
-from openapi_client.models import NumericalSettings
-from openapi_client.models import AggregationSettings
-from openapi_client import SimulationsApi
-from openapi_client import ApiException
-from threedi_api_client import ThreediApiClient
-from openapi_client.models import SimulationSettingsOverview
+try:
+    from openapi_client.models import GeneralSettings
+    from openapi_client.models import TimeStepSettings
+    from openapi_client.models import NumericalSettings
+    from openapi_client.models import AggregationSettings
+    from openapi_client import SimulationsApi
+    from openapi_client import ApiException
+    from threedi_api_client import ThreediApiClient
+    from openapi_client.models import SimulationSettingsOverview
+except ImportError:
+    msg = "You need to install the extra 'api' (e.g. 'pip install threedi-settings[api]') to be able to use the threedi-settings http module"  # noqa
+    raise ImportError(msg)
 
 from threedi_settings.mappings import (
     general_settings_map,
@@ -23,13 +27,15 @@ from threedi_settings.mappings import (
     numerical_settings_map,
     aggregation_settings_map,
 )
+from threedi_settings.models import NumericalConfig, TimeStepConfig, GeneralSimulationConfig, AggregationConfig, SimulationConfig
+from threedi_settings.threedimodel_config import ThreedimodelIni
 
 logger = logging.getLogger(__name__)
 import os
 
 
 api_config = {
-    "API_HOST": "http://localhost:8000/v3.0",
+    "API_HOST": os.environ.get("API_HOST"),
     "API_USERNAME": os.environ.get("API_USERNAME"),
     "API_PASSWORD": os.environ.get("API_PASSWORD")
 }
@@ -215,6 +221,7 @@ class OpenAPISimulationSettings(OpenApiSimulationClient):
 
     def __init__(self, simulation_id):
         super().__init__(simulation_id)
+        self._simulation_config = None
 
     def retrieve(self) -> SimulationSettingsOverview:
         try:
@@ -223,15 +230,65 @@ class OpenAPISimulationSettings(OpenApiSimulationClient):
             logger.error("Could not retrieve settings information for simulation %s", self.simulation_id)
             return
 
+    @property
+    def simulation_config(self):
+        if self._simulation_config:
+            return self._simulation_config
+
+        resp = self.retrieve()
+        if not resp:
+            return
+
+        attr_names = [
+            "general_settings", "time_step_settings", "numerical_settings"
+        ]
+        d = {}
+        uid = ""
+        sim_uid = ""
+        for name in attr_names:
+            tmp_d = getattr(resp, name).to_dict()
+            uid = str(tmp_d.pop("id"))
+            sim_uid = str(tmp_d.pop("simulation_id"))
+            d[name] = tmp_d
+
+        general_settings = GeneralSimulationConfig(
+            uid=uid, sim_uid=sim_uid, **d["general_settings"]
+        )
+        time_step_settings = TimeStepConfig(
+            uid=uid, sim_uid=sim_uid, **d["time_step_settings"]
+
+        )
+        numerical_settings = NumericalConfig(
+            uid=uid, sim_uid=sim_uid, **d["numerical_settings"]
+        )
+        self._simulation_config = SimulationConfig(
+            uid=uid, sim_uid=sim_uid,
+            general_config=general_settings,
+            time_step_config=time_step_settings,
+            numerical_config=numerical_settings
+        )
+        return self._simulation_config
+
 
 class OpenAPISimulationSettingsWriter(OpenAPISimulationSettings):
 
-    def __init__(self, simulation_id, ini_file_path: Path, aggregation_file_path: Path):
+    def __init__(
+        self,
+        simulation_id: int,
+        ini_file_path: Path,
+        aggregation_file_path: Path,
+        legacy_ini_file_path: Optional[Path]
+    ):
         super().__init__(simulation_id)
-        self.config = ConfigParser()
         self.aggr_config = ConfigParser()
         self.ini_output_file = ini_file_path
         self.aggregation_file_path = aggregation_file_path
+        self.legacy_conf = None
+        if legacy_ini_file_path:
+            legacy_ini = ThreedimodelIni(legacy_ini_file_path)
+            self.config = legacy_ini.config
+        else:
+            self.config = ConfigParser()
 
     @functools.cached_property
     def settings(self):
