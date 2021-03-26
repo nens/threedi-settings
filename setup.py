@@ -4,10 +4,10 @@
 
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
+with open('README.md') as readme_file:
     readme = readme_file.read()
 
-with open('HISTORY.rst') as history_file:
+with open('HISTORY.md') as history_file:
     history = history_file.read()
 
 requirements = []
@@ -38,9 +38,10 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
     ],
-    description="Convert l",
+    description="Export legacy 3Di model settings to the 3Di API V3",
     install_requires=requirements,
     license="MIT license",
+    long_description_content_type='text/markdown',
     long_description=readme + '\n\n' + history,
     include_package_data=True,
     keywords='threedi_settings',
@@ -49,6 +50,11 @@ setup(
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
+    entry_points={
+        "console_scripts":  [
+            "import-settings=threedi_settings.commands.import_simulation_settings:main ",  # noqa
+        ]
+    },
     extras_require={
         'cmd': cmd_requirements,
         'api': api_requirements

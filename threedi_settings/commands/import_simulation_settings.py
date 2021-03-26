@@ -1,7 +1,12 @@
 from pathlib import Path
 import logging
 
-import typer
+try:
+    import typer
+except ImportError:
+    raise ImportError(
+        "You need to install the extra 'cmd', e.g. pip install threedi-settings[cmd]"  # noqa
+    )
 
 from threedi_settings.threedimodel_config import ThreedimodelIni
 from threedi_settings.threedimodel_config import AggregationIni
@@ -18,7 +23,7 @@ settings_app = typer.Typer()
 
 
 @settings_app.command()
-def import_settings(
+def create_settings_resources(
     simulation_id: int,
     ini_file: Path = typer.Argument(
         ...,

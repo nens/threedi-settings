@@ -4,25 +4,25 @@ from typing import List, Optional
 
 @dataclass
 class BaseConfig:
-    """
-    """
+    """"""
+
     uid: str  # Unique id of setting
     sim_uid: str
 
 
 @dataclass
 class GeneralSimulationConfig(BaseConfig):
-     use_advection_1d: int
-     use_advection_2d: int
+    use_advection_1d: int
+    use_advection_2d: int
 
 
 @dataclass
 class TimeStepConfig(BaseConfig):
-     time_step: float
-     min_time_step: float
-     max_time_step: float
-     use_time_step_stretch: bool
-     output_time_step: float
+    time_step: float
+    min_time_step: float
+    max_time_step: float
+    use_time_step_stretch: bool
+    output_time_step: float
 
 
 @dataclass
