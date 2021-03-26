@@ -1,6 +1,6 @@
 ## History
 
-### 0.0.2 (unreleased)
+0.0.2 (2021-03-26)
 
 - Setup proper package incl readme.
 
