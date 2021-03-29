@@ -20,7 +20,7 @@ from openapi_client import ApiException
 
 from tests.fixtures import model_ini
 from tests.fixtures import aggregation_ini
-from tests.fixtures import simulation_overview
+from tests.client_fixtures import simulation_overview
 
 
 def test_openapi_settings_clients(model_ini):
