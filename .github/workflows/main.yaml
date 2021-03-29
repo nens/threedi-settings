@@ -27,7 +27,7 @@ jobs:
         pip install .
     - name: Test with pytest
       run: |
-        pytest pytest --cov=threedi_settings --cov-report term-missing tests/
+        pytest --cov=threedi_settings --cov-report term-missing
   publish:
     if: startsWith(github.ref, 'refs/tags')
     runs-on: ubuntu-latest
