@@ -125,10 +125,10 @@ def test_create_aggregation_settings_resource_error(mock_create, aggregation_ini
             client.create()
 
 
-@patch("threedi_settings.http.api_clients.OpenAPISimulationSettings")
+@patch.object(OpenAPISimulationSettings, "retrieve")
 def test_simulation_settings_client(mock, simulation_overview):
     client = OpenAPISimulationSettings(1)
-    mock.retrieve.return_value = simulation_overview
+    mock.return_value = simulation_overview
     assert isinstance(client.simulation_config, SimulationConfig)
 
 

@@ -1,5 +1,8 @@
 from openapi_client.models import SimulationSettingsOverview
 from openapi_client.models import AggregationSettings
+from openapi_client.models import GeneralSettings
+from openapi_client.models import TimeStepSettings
+from openapi_client.models import NumericalSettings
 
 import pytest
 
@@ -94,4 +97,13 @@ def simulation_overview():
     aggr_data = data.pop("aggregation_settings")
     agg_list = [AggregationSettings(**entry) for entry in aggr_data]
     data["aggregation_settings"] = agg_list
+    gen_data = data.pop("general_settings")
+    gen_sett = GeneralSettings(**gen_data)
+    data["general_settings"] = gen_sett
+    ts_data = data.pop("time_step_settings")
+    ts_sett = TimeStepSettings(**ts_data)
+    data["time_step_settings"] = ts_sett
+    n_data = data.pop("numerical_settings")
+    n_sett = NumericalSettings(**n_data)
+    data["numerical_settings"] = n_sett
     yield SimulationSettingsOverview(**data)
