@@ -3,7 +3,7 @@
 0.0.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Unit tests.
 
 
 0.0.2 (2021-03-26)
