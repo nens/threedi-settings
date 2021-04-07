@@ -10,11 +10,11 @@ except ImportError:
 
 from threedi_settings.threedimodel_config import ThreedimodelIni
 from threedi_settings.threedimodel_config import AggregationIni
-from threedi_settings.api_models import OpenAPINumericalSettings
-from threedi_settings.api_models import OpenAPITimeStepSettings
-from threedi_settings.api_models import OpenAPIGeneralSettings
-from threedi_settings.api_models import OpenAPIAggregationSettings
-from threedi_settings.api_models import OpenAPISimulationSettings
+from threedi_settings.http.api_clients import OpenAPINumericalSettings
+from threedi_settings.http.api_clients import OpenAPITimeStepSettings
+from threedi_settings.http.api_clients import OpenAPIGeneralSettings
+from threedi_settings.http.api_clients import OpenAPIAggregationSettings
+from threedi_settings.http.api_clients import OpenAPISimulationSettings
 
 logger = logging.getLogger(__name__)
 

@@ -10,8 +10,9 @@ logger = logging.getLogger(__name__)
 
 class ThreedimodelIni:
     """
-    Physical schema that describes how the model data is
-    represented and stored
+    Interface to the 3Di model ini file through the `config` attribute, a
+    `ConfigParser` instance. You can also parse the data into a dictionary
+    using the as_dict() method.
     """
 
     def __init__(self, config_file: Path):
@@ -27,11 +28,12 @@ class ThreedimodelIni:
         with open(self.config_file, "r") as ini_file:
             self.config.read_file(ini_file)
 
-    @property
-    def model_root(self) -> Path:
-        return self.config_file.parent
-
     def as_dict(self, flat: bool = True) -> Dict:
+        """
+        Parse the file into a dictionary.
+
+        To keep the sections defined in the ini file, call with `flat=False`
+        """
         d = {}
         sections = self.config.sections()
 
@@ -47,31 +49,18 @@ class ThreedimodelIni:
         return d
 
 
-class AggregationIni(ThreedimodelIni):
+class AggregationIni:
     """
-    Physical schema that describes how the model data is
-    represented and stored
+    Interface to the 3Di model aggregation file through the `aggregation`
+    attribute, a `ConfigParser` instance. You can also parse the data
+    into a dictionary using the as_dict() method.
     """
 
-    def __init__(self, config_file: Path):
-        """
-        :param config_file: configuration ini file
-        """
-        super().__init__(config_file=config_file)
+    def __init__(self, aggregation_file: Path):
         self.aggregation = ConfigParser()
-        if self.aggregation_ini:
-            with open(self.aggregation_ini, "r") as aggr_file:
-                self.aggregation.read_file(aggr_file)
-
-    @property
-    def aggregation_ini(self) -> Optional[Path]:
-        if not self.config["output"]["aggregation_settings"]:
-            return
-        return self.model_root / self.config["output"]["aggregation_settings"]
-
-    @property
-    def model_root(self) -> Path:
-        return self.config_file.parent
+        self.aggregation_ini = aggregation_file
+        with open(self.aggregation_ini, "r") as aggr_file:
+            self.aggregation.read_file(aggr_file)
 
     def as_dict(self) -> Dict:
         sections_dict = {}

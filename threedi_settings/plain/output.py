@@ -27,9 +27,11 @@ class SimulationConfigWriter:
         simulation_config: SimulationConfig,
         ini_file_path: Path,
         aggregation_file_path: Path,
-        legacy_ini_file_path: Optional[Path],
+        legacy_ini_file_path: Optional[Path] = None,
     ):
         self.simulation_config = simulation_config
+        assert (self.simulation_config is not None,
+                "simulation_config must not be 'None'")
         self.aggr_config = ConfigParser()
         self.ini_output_file = ini_file_path
         self.aggregation_file_path = aggregation_file_path

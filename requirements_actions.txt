@@ -1,3 +1,4 @@
 typer>=0.3.2
-threedi-api-client>=3.0.23
-pytest==6.2.2
+pytest
+pytest-cov
+threedi-api-client==3.0.25

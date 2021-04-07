@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 from abc import ABC, abstractmethod
 from collections import defaultdict
-import functools
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from urllib.parse import unquote, urlparse
 from pathlib import PurePosixPath
 import os
@@ -39,6 +38,12 @@ from threedi_settings.models import (
 logger = logging.getLogger(__name__)
 
 
+OpenApiSettingsModel = Union[
+    GeneralSettings,
+    TimeStepSettings,
+    NumericalSettings
+]
+
 api_config = {
     "API_HOST": os.environ.get("API_HOST"),
     "API_USERNAME": os.environ.get("API_USERNAME"),
@@ -47,6 +52,9 @@ api_config = {
 
 
 class OpenApiSimulationClient:
+    """
+    Interface to the threedi-api-client.
+    """
     def __init__(self, simulation_id: int):
         self.simulation_id = simulation_id
         _api_client = ThreediApiClient(config=api_config)
@@ -54,16 +62,25 @@ class OpenApiSimulationClient:
 
 
 class BaseOpenAPI(ABC, OpenApiSimulationClient):
+    """Base class to interact with 3Di settings resources"""
     def __init__(
-        self, simulation_id: int, config_dict, openapi_model, mapping
+        self, simulation_id: int,
+        config_dict: Dict,
+        openapi_model: OpenApiSettingsModel,
+        mapping: Dict
     ):
         super().__init__(simulation_id)
         self.config_dict = config_dict
         self.model = openapi_model
         self.mapping = mapping
+        self._instance: OpenApiSettingsModel = None
 
-    @functools.cached_property
-    def instance(self):
+    @property
+    def instance(self) -> OpenApiSettingsModel:
+        """
+        Converts the settings stored in `config_dict` confrom the definitions
+        in `mapping` and returns a populated `OpenApiSettingsModel` instance.
+        """
         data = {}
         exclude = {
             "url",
@@ -85,8 +102,9 @@ class BaseOpenAPI(ABC, OpenApiSimulationClient):
                     except Exception:
                         raise
             except ValueError as err:
-                logger.warning(
-                    f"{err} --> {ini_value} --> {legacy_field_info}"
+                logger.info(
+                    "Using default value %s for %s",
+                    api_field_info.default, name
                 )
                 ini_value = api_field_info.default
             data[name] = ini_value
@@ -98,13 +116,20 @@ class BaseOpenAPI(ABC, OpenApiSimulationClient):
         """name of the openapi client method to create a resource"""
         ...
 
-    def create(self):
+    def _create_method(self):
+        """
+        :returns create method
+        :raises AttributeError if the create_method_name is not known
+        """
         try:
-            create = getattr(self.api_client, self.create_method_name)
+            return getattr(self.api_client, self.create_method_name)
         except AttributeError:
             raise AttributeError(
                 f"Create method '{self.create_method_name}' unknown"
             )
+
+    def create(self) -> Optional[OpenApiSettingsModel]:
+        create = self._create_method()
         try:
             resp = create(self.simulation_id, self.instance)
         except ApiException as err:
@@ -123,7 +148,7 @@ class BaseOpenAPI(ABC, OpenApiSimulationClient):
 
 
 class OpenAPIGeneralSettings(BaseOpenAPI):
-    def __init__(self, simulation_id: int, config):
+    def __init__(self, simulation_id: int, config: Dict):
         super().__init__(
             simulation_id, config, GeneralSettings, general_settings_map
         )
@@ -134,24 +159,24 @@ class OpenAPIGeneralSettings(BaseOpenAPI):
 
 
 class OpenAPITimeStepSettings(BaseOpenAPI):
-    def __init__(self, simulation_id: int, config):
+    def __init__(self, simulation_id: int, config: Dict):
         super().__init__(
             simulation_id, config, TimeStepSettings, time_step_settings_map
         )
 
     @property
-    def create_method_name(self):
+    def create_method_name(self) -> str:
         return "simulations_settings_time_step_create"
 
 
 class OpenAPINumericalSettings(BaseOpenAPI):
-    def __init__(self, simulation_id: int, config):
+    def __init__(self, simulation_id: int, config: Dict):
         super().__init__(
             simulation_id, config, NumericalSettings, numerical_settings_map
         )
 
     @property
-    def create_method_name(self):
+    def create_method_name(self) -> str:
         return "simulations_settings_numerical_create"
 
 
@@ -161,14 +186,17 @@ class OpenAPIAggregationSettings(OpenApiSimulationClient):
         self.config_dict = config
         self.model = AggregationSettings
         self.mapping = aggregation_settings_map
+        self._instances = []
 
     @property
-    def create_method_name(self):
+    def create_method_name(self) -> str:
         return "simulations_settings_aggregation_create"
 
-    @functools.cached_property
-    def instances(self) -> List:
-        _instances = []
+    @property
+    def instances(self) -> List[AggregationSettings]:
+        if self._instances:
+            return self._instances
+
         data = defaultdict(str)
         exclude = {
             "url",
@@ -182,24 +210,11 @@ class OpenAPIAggregationSettings(OpenApiSimulationClient):
                     data[name] = self.simulation_id
                     continue
                 legacy_field_info, api_field_info = self.mapping[name]
-                ini_value = d[legacy_field_info.name]
-                try:
-                    ini_value = legacy_field_info.type(ini_value)
-                    if api_field_info.type != legacy_field_info.type:
-                        try:
-                            ini_value = api_field_info.type(ini_value)
-                        except Exception:
-                            raise
-                except ValueError as err:
-                    logger.warning(
-                        f"{err} --> {ini_value} --> {legacy_field_info}"
-                    )
-                    ini_value = api_field_info.default
-                data[name] = ini_value
-            _instances.append(self.model(**data))
-        return _instances
+                data[name] = d[legacy_field_info.name]
+            self._instances.append(self.model(**data))
+        return self._instances
 
-    def create(self):
+    def create(self) -> List[AggregationSettings]:
         try:
             create = getattr(self.api_client, self.create_method_name)
         except AttributeError:
@@ -268,11 +283,14 @@ class OpenAPISimulationSettings(OpenApiSimulationClient):
         uid = ""
         sim_uid = ""
         for name in attr_names:
-            tmp_d = getattr(resp, name).to_dict()
+            try:
+                tmp_d = getattr(resp, name).to_dict()
+            except AttributeError:
+                logger.debug("No %s api settings found", name)
+                return
             uid = str(tmp_d.pop("id"))
             sim_uid = str(tmp_d.pop("simulation_id"))
             d[name] = tmp_d
-
         general_settings = GeneralSimulationConfig(
             uid=uid, sim_uid=sim_uid, **d["general_settings"]
         )
@@ -293,7 +311,11 @@ class OpenAPISimulationSettings(OpenApiSimulationClient):
         )
         return self._simulation_config
 
-    def _get_aggregations(self, resp, sim_uid) -> List:
+    def _get_aggregations(
+        self,
+        resp: SimulationSettingsOverview,
+        sim_uid: str
+    ) -> List:
         """
         extract the aggregation settings from the response data
         """
