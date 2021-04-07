@@ -17,7 +17,7 @@ cmd_requirements = [
 ]
 
 api_requirements = [
-    'threedi-api-client>3.0.23'
+    'threedi-api-client>3.0.24'
 ]
 
 setup_requirements = ['pytest-runner', ]
