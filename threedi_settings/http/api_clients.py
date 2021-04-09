@@ -92,11 +92,11 @@ class BaseOpenAPI(ABC, OpenApiSimulationClient):
             if name == "simulation_id":
                 data[name] = self.simulation_id
                 continue
-            legacy_field_info, api_field_info = self.mapping[name]
-            ini_value = self.config_dict[legacy_field_info.name]
+            ini_field_info, api_field_info, sqlite_field_info = self.mapping[name]
+            ini_value = self.config_dict[ini_field_info.name]
             try:
-                ini_value = legacy_field_info.type(ini_value)
-                if api_field_info.type != legacy_field_info.type:
+                ini_value = ini_field_info.type(ini_value)
+                if api_field_info.type != ini_field_info.type:
                     try:
                         ini_value = api_field_info.type(ini_value)
                     except Exception:
@@ -209,8 +209,8 @@ class OpenAPIAggregationSettings(OpenApiSimulationClient):
                 if name == "simulation_id":
                     data[name] = self.simulation_id
                     continue
-                legacy_field_info, api_field_info = self.mapping[name]
-                data[name] = d[legacy_field_info.name]
+                ini_field_info, api_field_info, sqlite_info = self.mapping[name]
+                data[name] = d[ini_field_info.name]
             self._instances.append(self.model(**data))
         return self._instances
 
