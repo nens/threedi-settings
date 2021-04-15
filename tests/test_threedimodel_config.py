@@ -1,6 +1,6 @@
 import pytest
 
-from threedi_settings.threedimodel_config import ThreedimodelSqlite
+from threedi_settings.threedimodel_config import ThreedimodelSqlite, RowDoesNotExistError
 from threedi_settings.threedimodel_config import AggregationIni
 from threedi_settings.mappings import settings_map
 
@@ -44,3 +44,15 @@ def test_threedimodelsqlite_aggregations(model_sqlite):
     tms = ThreedimodelSqlite(model_sqlite, 1)
     assert isinstance(tms.aggregation_settings, dict)
     assert len(tms.aggregation_settings.keys()) == 10
+
+
+def test_threedimodelsqlite_wrong_row(model_sqlite):
+    tms = ThreedimodelSqlite(model_sqlite, 100)
+    with pytest.raises(RowDoesNotExistError):
+        assert tms.global_settings
+
+    with pytest.raises(RowDoesNotExistError):
+        assert tms.numerical_settings
+
+    with pytest.raises(RowDoesNotExistError):
+        assert tms.as_dict()

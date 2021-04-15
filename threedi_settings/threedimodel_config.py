@@ -94,6 +94,10 @@ class ThreedimodelSqliteBase:
         self.cursor = conn.cursor()
 
 
+class RowDoesNotExistError(Exception):
+    pass
+
+
 class ThreedimodelSqlite(ThreedimodelSqliteBase):
     """
     Interface to the 3Di model sqlite file
@@ -125,15 +129,26 @@ class ThreedimodelSqlite(ThreedimodelSqliteBase):
             self._aggregation_settings = self._get_aggregation_settings()
         return self._aggregation_settings
 
-    def _get_global_settings(self):
+    def _get_global_settings(self) -> Dict:
+        """
+        :raises RowDoesNotExistError if the given table row does not exist
+        """
         field_names = self.table_schemas[SettingsTables.global_settings]
         fn = ",".join(field_names)
         fn += ",numerical_settings_id"
         statement = f"SELECT {fn} FROM {SettingsTables.global_settings.value} WHERE id={self.row_id}"
         self.cursor.execute(statement)
-        return dict(self.cursor.fetchone())
+        try:
+            return dict(self.cursor.fetchone())
+        except TypeError:
+            raise RowDoesNotExistError(
+                f"v2_global_settings row with ID {self.row_id} does not exist"
+            )
 
-    def _get_numerical_settings(self):
+    def _get_numerical_settings(self) -> Dict:
+        """
+        :raises RowDoesNotExistError if the given table row does not exist
+        """
         field_names = self.table_schemas[SettingsTables.numerical_settings]
         fn = ",".join(field_names)
         row_id = self.global_settings["numerical_settings_id"]
@@ -141,7 +156,7 @@ class ThreedimodelSqlite(ThreedimodelSqliteBase):
         self.cursor.execute(statement)
         return dict(self.cursor.fetchone())
 
-    def _get_aggregation_settings(self):
+    def _get_aggregation_settings(self) -> Dict:
         field_names = self.table_schemas[SettingsTables.aggregation_settings]
         fn = ",".join(field_names)
         statement = f"SELECT {fn} FROM {SettingsTables.aggregation_settings.value}"
@@ -151,7 +166,10 @@ class ThreedimodelSqlite(ThreedimodelSqliteBase):
             d[i] = dict(entry)
         return d
 
-    def as_dict(self):
+    def as_dict(self) -> Dict:
+        """
+        :raises RowDoesNotExistError if the given table row does not exist
+        """
         return {
             **self.global_settings,
             **self.numerical_settings

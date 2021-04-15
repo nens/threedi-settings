@@ -17,7 +17,7 @@ from threedi_settings.http.api_clients import OpenAPITimeStepSettings
 from threedi_settings.http.api_clients import OpenAPIGeneralSettings
 from threedi_settings.http.api_clients import OpenAPIAggregationSettings
 from threedi_settings.http.api_clients import OpenAPISimulationSettings
-from threedi_settings.threedimodel_config import ThreedimodelSqlite
+from threedi_settings.threedimodel_config import ThreedimodelSqlite, RowDoesNotExistError
 from threedi_settings.pretty.output import ResponseTree
 from threedi_settings.models import SourceTypes
 from typing import Dict, Optional
@@ -25,7 +25,7 @@ from typing import Dict, Optional
 logger = logging.getLogger(__name__)
 
 settings_app = typer.Typer()
-
+console = Console()
 
 def _create(
     simulation_id: int,
@@ -109,10 +109,17 @@ def import_from_sqlite(
 
     tms = ThreedimodelSqlite(sqlite_file, settings_row)
     aggr = tms.aggregation_settings if aggregations else None
+
+    try:
+        settings = tms.as_dict()
+    except RowDoesNotExistError as err:
+        console.print(f"[bold red] {err}")
+        raise typer.Exit(1)
+
     resp = _create(
         simulation_id,
         SourceTypes.sqlite_file,
-        tms.as_dict(),
+        settings,
         aggr
     )
     rt = ResponseTree(resp)
