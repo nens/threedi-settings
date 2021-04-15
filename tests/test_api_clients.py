@@ -16,7 +16,7 @@ from openapi_client.models import NumericalSettings
 from openapi_client.models import AggregationSettings
 from openapi_client.models import SimulationSettingsOverview
 from openapi_client import ApiException
-
+from threedi_settings.models import SourceTypes
 
 from tests.fixtures import model_ini
 from tests.fixtures import aggregation_ini
@@ -27,9 +27,9 @@ def test_openapi_settings_clients(model_ini):
     # smoke tests
     config = model_ini.as_dict()
     clients = [
-        OpenAPIGeneralSettings(1, config),
-        OpenAPINumericalSettings(1, config),
-        OpenAPITimeStepSettings(1, config),
+        OpenAPIGeneralSettings(1, config, SourceTypes.ini_file),
+        OpenAPINumericalSettings(1, config, SourceTypes.ini_file),
+        OpenAPITimeStepSettings(1, config, SourceTypes.ini_file),
     ]
     for client in clients:
         assert isinstance(
@@ -42,7 +42,7 @@ def test_openapi_settings_clients(model_ini):
 
 def test_openapi_name_conversions(model_ini):
     config = model_ini.as_dict()
-    client = OpenAPIGeneralSettings(1, config)
+    client = OpenAPIGeneralSettings(1, config, SourceTypes.ini_file)
     # should have attributes use_advection_2d/1d now
     assert client.instance.use_advection_2d == 0  # from ini
     assert client.instance.use_advection_1d == 0  # from ini
@@ -50,21 +50,21 @@ def test_openapi_name_conversions(model_ini):
 
 def test_openapi_defaults_from_mapping(model_ini):
     config = model_ini.as_dict()
-    client = OpenAPINumericalSettings(1, config)
+    client = OpenAPINumericalSettings(1, config, SourceTypes.ini_file)
     # should have a default from mapping
     assert client.instance.friction_shallow_water_depth_correction == 0
 
 
 def test_openapi_type_conversions(model_ini):
     config = model_ini.as_dict()
-    client = OpenAPINumericalSettings(1, config)
+    client = OpenAPINumericalSettings(1, config, SourceTypes.ini_file)
     # should have a default from mapping
     assert client.instance.use_nested_newton is False
 
 
 def test_openapi__create_method_property(model_ini):
     config = model_ini.as_dict()
-    client = OpenAPITimeStepSettings(1, config)
+    client = OpenAPITimeStepSettings(1, config, SourceTypes.ini_file)
     assert callable(client._create_method)
 
 
@@ -73,7 +73,7 @@ def test_openapi__create_method_property(model_ini):
 def test_openapi__create_method_error(mock_create_method, model_ini):
     config = model_ini.as_dict()
     mock_create_method.return_value = "invalid"
-    client = OpenAPITimeStepSettings(1, config)
+    client = OpenAPITimeStepSettings(1, config, SourceTypes.ini_file)
     with pytest.raises(AttributeError):
         client._create_method()
 
@@ -81,7 +81,7 @@ def test_openapi__create_method_error(mock_create_method, model_ini):
 @patch.object(OpenAPIGeneralSettings, 'create')
 def test_create_general_settings_resource(mock_create, model_ini):
     config = model_ini.as_dict()
-    client = OpenAPIGeneralSettings(1, config)
+    client = OpenAPIGeneralSettings(1, config, SourceTypes.ini_file)
 
     mock_create.return_value = client.instance
     resp = client.create()
@@ -91,7 +91,7 @@ def test_create_general_settings_resource(mock_create, model_ini):
 @patch.object(OpenAPIGeneralSettings, 'create')
 def test_create_general_settings_resource_error(mock_create, model_ini):
     config = model_ini.as_dict()
-    client = OpenAPIGeneralSettings(1, config)
+    client = OpenAPIGeneralSettings(1, config, SourceTypes.ini_file)
 
     mock_create.side_effect = ApiException
     # create, side effect ApiExc, AttrErr

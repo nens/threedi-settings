@@ -1,9 +1,12 @@
-from pathlib import Path
+import pytest
 
-from threedi_settings.threedimodel_config import ThreedimodelIni
+from threedi_settings.threedimodel_config import ThreedimodelSqlite
 from threedi_settings.threedimodel_config import AggregationIni
+from threedi_settings.mappings import settings_map
 
 from tests.fixtures import model_ini, AGGRE
+from tests.sqlite_fixture import model_sqlite
+
 
 
 def tests_threedimodelini_as_dict(model_ini):
@@ -25,3 +28,19 @@ def tests_aggregation_as_dict():
     ini_dict = model_aggre.as_dict()
     assert len(ini_dict.keys()) == 10
 
+
+def test_threedimodelsqlite_as_dict(model_sqlite):
+    tms = ThreedimodelSqlite(model_sqlite, 1)
+    tms_set = set(tms.as_dict().keys())
+    map_set = set()
+    for item in settings_map.values():
+        _, _, sqlite_info = item
+        map_set.add(sqlite_info.name)
+    tms_set.discard("numerical_settings_id")
+    assert tms_set == map_set
+
+
+def test_threedimodelsqlite_aggregations(model_sqlite):
+    tms = ThreedimodelSqlite(model_sqlite, 1)
+    assert isinstance(tms.aggregation_settings, dict)
+    assert len(tms.aggregation_settings.keys()) == 10

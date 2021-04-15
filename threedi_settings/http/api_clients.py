@@ -6,7 +6,7 @@ import logging
 from typing import Dict, List, Optional, Union
 from urllib.parse import unquote, urlparse
 from pathlib import PurePosixPath
-import os
+
 
 try:
     from openapi_client.models import GeneralSettings
@@ -33,7 +33,9 @@ from threedi_settings.models import (
     GeneralSimulationConfig,
     AggregationConfig,
     SimulationConfig,
+    SourceTypes,
 )
+from . import api_config
 
 logger = logging.getLogger(__name__)
 
@@ -43,12 +45,6 @@ OpenApiSettingsModel = Union[
     TimeStepSettings,
     NumericalSettings
 ]
-
-api_config = {
-    "API_HOST": os.environ.get("API_HOST"),
-    "API_USERNAME": os.environ.get("API_USERNAME"),
-    "API_PASSWORD": os.environ.get("API_PASSWORD"),
-}
 
 
 class OpenApiSimulationClient:
@@ -64,21 +60,24 @@ class OpenApiSimulationClient:
 class BaseOpenAPI(ABC, OpenApiSimulationClient):
     """Base class to interact with 3Di settings resources"""
     def __init__(
-        self, simulation_id: int,
+        self,
+        simulation_id: int,
         config_dict: Dict,
         openapi_model: OpenApiSettingsModel,
-        mapping: Dict
+        mapping: Dict,
+        source_type: SourceTypes,
     ):
         super().__init__(simulation_id)
         self.config_dict = config_dict
         self.model = openapi_model
         self.mapping = mapping
         self._instance: OpenApiSettingsModel = None
+        self.source_type = source_type
 
     @property
     def instance(self) -> OpenApiSettingsModel:
         """
-        Converts the settings stored in `config_dict` confrom the definitions
+        Converts the settings stored in `config_dict` conform the definitions
         in `mapping` and returns a populated `OpenApiSettingsModel` instance.
         """
         data = {}
@@ -93,21 +92,27 @@ class BaseOpenAPI(ABC, OpenApiSimulationClient):
                 data[name] = self.simulation_id
                 continue
             ini_field_info, api_field_info, sqlite_field_info = self.mapping[name]
-            ini_value = self.config_dict[ini_field_info.name]
+            if self.source_type == SourceTypes.ini_file:
+                field_info = ini_field_info
+            elif self.source_type == SourceTypes.sqlite_file:
+                field_info = sqlite_field_info
+            else:
+                raise TypeError("input_type must be either ini or sqlite")
+            value = self.config_dict[field_info.name]
             try:
-                ini_value = ini_field_info.type(ini_value)
-                if api_field_info.type != ini_field_info.type:
+                value = field_info.type(value)
+                if api_field_info.type != field_info.type:
                     try:
-                        ini_value = api_field_info.type(ini_value)
+                        value = api_field_info.type(value)
                     except Exception:
                         raise
-            except ValueError as err:
+            except (ValueError, TypeError) as err:
                 logger.info(
                     "Using default value %s for %s",
                     api_field_info.default, name
                 )
-                ini_value = api_field_info.default
-            data[name] = ini_value
+                value = api_field_info.default
+            data[name] = value
         return self.model(**data)
 
     @property
@@ -148,9 +153,9 @@ class BaseOpenAPI(ABC, OpenApiSimulationClient):
 
 
 class OpenAPIGeneralSettings(BaseOpenAPI):
-    def __init__(self, simulation_id: int, config: Dict):
+    def __init__(self, simulation_id: int, config: Dict, settings_source: SourceTypes):
         super().__init__(
-            simulation_id, config, GeneralSettings, general_settings_map
+            simulation_id, config, GeneralSettings, general_settings_map, settings_source
         )
 
     @property
@@ -159,9 +164,9 @@ class OpenAPIGeneralSettings(BaseOpenAPI):
 
 
 class OpenAPITimeStepSettings(BaseOpenAPI):
-    def __init__(self, simulation_id: int, config: Dict):
+    def __init__(self, simulation_id: int, config: Dict, settings_source: SourceTypes):
         super().__init__(
-            simulation_id, config, TimeStepSettings, time_step_settings_map
+            simulation_id, config, TimeStepSettings, time_step_settings_map, settings_source
         )
 
     @property
@@ -170,9 +175,9 @@ class OpenAPITimeStepSettings(BaseOpenAPI):
 
 
 class OpenAPINumericalSettings(BaseOpenAPI):
-    def __init__(self, simulation_id: int, config: Dict):
+    def __init__(self, simulation_id: int, config: Dict, settings_source: SourceTypes):
         super().__init__(
-            simulation_id, config, NumericalSettings, numerical_settings_map
+            simulation_id, config, NumericalSettings, numerical_settings_map, settings_source
         )
 
     @property

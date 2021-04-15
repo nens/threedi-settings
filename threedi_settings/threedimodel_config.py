@@ -3,7 +3,10 @@
 from pathlib import Path
 import logging
 from configparser import ConfigParser
-from typing import Optional, Dict
+from typing import Dict
+import sqlite3
+
+from threedi_settings.mappings import get_sqlite_table_schemas, SettingsTables
 
 logger = logging.getLogger(__name__)
 
@@ -77,3 +80,79 @@ class AggregationIni:
             sections_dict[section] = temp_dict
 
         return sections_dict
+
+
+class ThreedimodelSqliteBase:
+    def __init__(self, sqlite_file: Path):
+        self.sqlite_file = sqlite_file
+        assert sqlite_file.exists() and sqlite_file.is_file(), f"file {sqlite_file} does not exist"
+        self.setup_db()
+
+    def setup_db(self):
+        conn = sqlite3.connect(self.sqlite_file)
+        conn.row_factory = sqlite3.Row
+        self.cursor = conn.cursor()
+
+
+class ThreedimodelSqlite(ThreedimodelSqliteBase):
+    """
+    Interface to the 3Di model sqlite file
+    """
+
+    def __init__(self, sqlite_file: Path, row_id: int):
+        super().__init__(sqlite_file=sqlite_file)
+        self.row_id = row_id
+        self.table_schemas = get_sqlite_table_schemas()
+        self._global_settings = None
+        self._numerical_settings = None
+        self._aggregation_settings = None
+
+    @property
+    def global_settings(self):
+        if not self._global_settings:
+            self._global_settings = self._get_global_settings()
+        return self._global_settings
+
+    @property
+    def numerical_settings(self):
+        if not self._numerical_settings:
+            self._numerical_settings = self._get_numerical_settings()
+        return self._numerical_settings
+
+    @property
+    def aggregation_settings(self):
+        if not self._aggregation_settings:
+            self._aggregation_settings = self._get_aggregation_settings()
+        return self._aggregation_settings
+
+    def _get_global_settings(self):
+        field_names = self.table_schemas[SettingsTables.global_settings]
+        fn = ",".join(field_names)
+        fn += ",numerical_settings_id"
+        statement = f"SELECT {fn} FROM {SettingsTables.global_settings.value} WHERE id={self.row_id}"
+        self.cursor.execute(statement)
+        return dict(self.cursor.fetchone())
+
+    def _get_numerical_settings(self):
+        field_names = self.table_schemas[SettingsTables.numerical_settings]
+        fn = ",".join(field_names)
+        row_id = self.global_settings["numerical_settings_id"]
+        statement = f"SELECT {fn} FROM {SettingsTables.numerical_settings.value} WHERE id={row_id}"
+        self.cursor.execute(statement)
+        return dict(self.cursor.fetchone())
+
+    def _get_aggregation_settings(self):
+        field_names = self.table_schemas[SettingsTables.aggregation_settings]
+        fn = ",".join(field_names)
+        statement = f"SELECT {fn} FROM {SettingsTables.aggregation_settings.value}"
+        self.cursor.execute(statement)
+        d = dict()
+        for i, entry in enumerate(self.cursor.fetchall()):
+            d[i] = dict(entry)
+        return d
+
+    def as_dict(self):
+        return {
+            **self.global_settings,
+            **self.numerical_settings
+        }

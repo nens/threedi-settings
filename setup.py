@@ -13,7 +13,8 @@ with open('HISTORY.md') as history_file:
 requirements = []
 
 cmd_requirements = [
-    'typer>=0.3.2'
+    'typer>=0.3.2',
+    'rich>=10.1.0'
 ]
 
 api_requirements = [
