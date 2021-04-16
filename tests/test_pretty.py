@@ -1,5 +1,5 @@
 from tests.client_fixtures import simulation_overview
-from threedi_settings.pretty.output import ResponseTree
+from threedi_settings.pretty.output.http import ResponseTree
 
 
 # smoke test

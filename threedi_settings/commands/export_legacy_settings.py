@@ -38,8 +38,8 @@ def _create(
 ):
     """create all API settings resources"""
     OpenAPINumericalSettings(simulation_id, settings, source).create()
-    OpenAPITimeStepSettings(simulation_id, settings, SourceTypes.sqlite_file).create()
-    OpenAPIGeneralSettings(simulation_id, settings, SourceTypes.sqlite_file).create()
+    OpenAPITimeStepSettings(simulation_id, settings, source).create()
+    OpenAPIGeneralSettings(simulation_id, settings, source).create()
     if aggregations:
         OpenAPIAggregationSettings(simulation_id, aggregations).create()
     sim_settings = OpenAPISimulationSettings(simulation_id)
