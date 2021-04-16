@@ -76,7 +76,7 @@ class SimulationConfigWriter:
         """
         for attr_name, mapping in settings_map.items():
             value = getattr(sub_setting, attr_name)
-            legacy_field_info, api_field_info = mapping
+            legacy_field_info, api_field_info, _ = mapping
             if legacy_field_info.ini_section not in self.config:
                 self.config[legacy_field_info.ini_section] = {}
             if legacy_field_info.type != api_field_info:
@@ -95,7 +95,7 @@ class SimulationConfigWriter:
         ):
             for attr_name, mapping in aggregation_settings_map.items():
                 value = getattr(entry, attr_name)
-                legacy_field_info, _ = mapping
+                legacy_field_info, _, _ = mapping
                 if str(i) not in self.aggr_config:
                     self.aggr_config[str(i)] = {}
                 self.aggr_config[str(i)][legacy_field_info.name] = f"{value}"

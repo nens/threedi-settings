@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import List, Optional
 
 
@@ -67,3 +68,8 @@ class SimulationConfig(BaseConfig):
     aggregation_config: Optional[List[AggregationConfig]] = field(
         default_factory=list
     )
+
+
+class SourceTypes(int, Enum):
+    ini_file = 1
+    sqlite_file = 2
