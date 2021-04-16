@@ -12,12 +12,23 @@ To get all functionalities this package as to offer, install with all extras
 
 ### Usage
 
+Before you hit it off make sure you have the following environment variables set correctly
+
+```shell script
+API_HOST=https://api.3di.live/v3.0  # no trailing slash
+API_USERNAME=<your name goes here>
+API_PASSWORD=<your password goes here>
+```
+
+
+
 Ths will give you access to the command line interface that let's you convert 3Di model settings to
 3Di API resources. There are two flavors. Either use a model `*.ini` file as input or the `*.sqlite` file.
 
 Both commands requires a `SIMULATION_ID` argument as settings can only be defined
 on a per simulation basis in the API. That gives you much more flexibility to experiment
 with different configurations.
+
 
 
 #### Export from SQLITE database file
