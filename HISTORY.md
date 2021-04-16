@@ -3,7 +3,11 @@
 0.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added export from sqlite file command.
+
+- Added command that lists the global settings entries of a given sqlite file.
+
+- Added command that shows a description of the simulation settings API V3 fields.
 
 
 0.0.3 (2021-04-07)
