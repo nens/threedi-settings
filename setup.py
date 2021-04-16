@@ -13,15 +13,14 @@ with open('HISTORY.md') as history_file:
 requirements = []
 
 cmd_requirements = [
-    'typer>=0.3.2',
-    'rich>=10.1.0'
+    "typer>=0.3.2",
+    "rich>=10.1.0",
+    "PyYAML>=5.1",
 ]
 
 api_requirements = [
     'threedi-api-client>3.0.24'
 ]
-
-setup_requirements = ['pytest-runner', ]
 
 test_requirements = ['pytest>=3', ]
 
@@ -48,12 +47,13 @@ setup(
     keywords='threedi_settings',
     name='threedi_settings',
     packages=find_packages(include=['threedi_settings', 'threedi_settings.*']),
-    setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
     entry_points={
         "console_scripts":  [
-            "import-settings=threedi_settings.commands.import_simulation_settings:main ",  # noqa
+            "export-settings=threedi_settings.commands.export_legacy_settings:settings_app ",  # noqa
+            "describe-simulation-settings=threedi_settings.commands.helpers:helper_app",  # noqa
+            "global-settings=threedi_settings.commands.global_settings:global_settings_app",  # noqa
         ]
     },
     extras_require={

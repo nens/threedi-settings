@@ -1,12 +1,12 @@
 from urllib.parse import unquote, urlparse
 from pathlib import PurePosixPath
 
-
 try:
     from rich.console import Console
     from rich.table import Table
     from rich.tree import Tree
     from rich.panel import Panel
+    from rich import box
 except ImportError:
     raise ImportError(
         "You need to install the extra 'cmd', e.g. pip install threedi-settings[cmd]"  # noqa

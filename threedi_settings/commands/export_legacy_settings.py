@@ -18,7 +18,9 @@ from threedi_settings.http.api_clients import OpenAPIGeneralSettings
 from threedi_settings.http.api_clients import OpenAPIAggregationSettings
 from threedi_settings.http.api_clients import OpenAPISimulationSettings
 from threedi_settings.threedimodel_config import ThreedimodelSqlite, RowDoesNotExistError
-from threedi_settings.pretty.output import ResponseTree
+from threedi_settings.pretty.output.global_settings import OverViewTable
+from threedi_settings.pretty.output.http import ResponseTree
+
 from threedi_settings.models import SourceTypes
 from typing import Dict, Optional
 
@@ -27,12 +29,14 @@ logger = logging.getLogger(__name__)
 settings_app = typer.Typer()
 console = Console()
 
+
 def _create(
     simulation_id: int,
     source: SourceTypes,
     settings: Dict,
     aggregations: Optional[Dict] = None
 ):
+    """create all API settings resources"""
     OpenAPINumericalSettings(simulation_id, settings, source).create()
     OpenAPITimeStepSettings(simulation_id, settings, SourceTypes.sqlite_file).create()
     OpenAPIGeneralSettings(simulation_id, settings, SourceTypes.sqlite_file).create()
@@ -43,7 +47,7 @@ def _create(
 
 
 @settings_app.command()
-def import_from_ini(
+def export_from_ini(
     simulation_id: int,
     ini_file: Path = typer.Argument(
         ...,
@@ -82,7 +86,7 @@ def import_from_ini(
 
 
 @settings_app.command()
-def import_from_sqlite(
+def export_from_sqlite(
     simulation_id: int,
     sqlite_file: Path = typer.Argument(
         ...,
@@ -94,13 +98,13 @@ def import_from_sqlite(
     ),
     settings_row: int = typer.Argument(
         1,
-        help="Specify the row id of the v2_global_settings entry you want to import."
+        help="Specify the row id of the v2_global_settings entry you want to export."
     ),
     aggregations: bool = typer.Option(
         True,
         help=
-        "If the '--no-aggregations' option is not explicitlly set, the "
-        "aggregation settings found in the sqlite file will be imported, too."
+        "If the '--no-aggregations' option is not explicitly set, the "
+        "aggregation settings found in the sqlite file will be exported, too."
     ),
 ):
     """
@@ -114,6 +118,10 @@ def import_from_sqlite(
         settings = tms.as_dict()
     except RowDoesNotExistError as err:
         console.print(f"[bold red] {err}")
+        available_ids = tms.get_global_settings_ids()
+        overview = OverViewTable(available_ids)
+        console.print(f"[green] Please choose from one of the following:")
+        console.print(overview.table)
         raise typer.Exit(1)
 
     resp = _create(

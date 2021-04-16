@@ -1,12 +1,11 @@
-from pathlib import Path
-import yaml
+from typing import Dict
 
 from threedi_settings.mappings import swagger_definitions_map, swagger_url_map
 from threedi_settings.http.helpers import (
     get_threedi_openapi_specification, SwaggerSpecificationCode
 )
-f = Path("./swagger.yaml")
 try:
+    import yaml
     import typer
     from rich.console import Console
     from rich.tree import Tree
@@ -18,17 +17,24 @@ except ImportError:
 
 helper_app = typer.Typer()
 
+SETTINGS_FIELD_STYLES = {
+    'description': "[bold cyan]",
+    'type': "[italic gold1]",
+    'maximum': "[italic orange3]",
+    'minimum': "[italic dark_goldenrod]"
+}
 
-def set_attrs(x, tree):
-    fields = {
-        'description': "[bold cyan]",
-        'type': "[italic gold1]",
-        'maximum': "[italic orange3]",
-        'minimum': "[italic dark_goldenrod]"
-    }
+console = Console()
 
-    for field, style in fields.items():
-        value = x.get(field, "")
+
+def set_attrs(field_def: Dict, tree: Tree) -> None:
+    """
+    adds the field definitions that match the keys in
+    SETTINGS_FIELD_STYLES to the given tree instance
+    """
+
+    for field, style in SETTINGS_FIELD_STYLES.items():
+        value = field_def.get(field, "")
         if not value:
             continue
         value_str = f"{style}{value}"
@@ -37,12 +43,11 @@ def set_attrs(x, tree):
 
 
 @helper_app.command()
-def settings_help():
+def settings_description():
     """
-    Shows all settings fields, help texts on how to use them,
+    Shows all API V3 simulation settings fields, help texts on how to use them,
     suitable defaults, types etc.
     """
-    console = Console()
     tree = Tree("Settings Description")
 
     code, resp = get_threedi_openapi_specification()
@@ -63,9 +68,9 @@ def settings_help():
         sub_tree = tree.add(p)
         for field_name, info in map.items():
             try:
-                x = swagger_defs[swagger_key]["properties"][field_name]
+                field_def = swagger_defs[swagger_key]["properties"][field_name]
                 field_tree = sub_tree.add(f"[green]{field_name}")
-                set_attrs(x, field_tree)
+                set_attrs(field_def, field_tree)
             except KeyError as err:
                 print(f"{err} {field_name}")
                 pass

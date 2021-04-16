@@ -3,7 +3,7 @@
 from pathlib import Path
 import logging
 from configparser import ConfigParser
-from typing import Dict
+from typing import Dict, List
 import sqlite3
 
 from threedi_settings.mappings import get_sqlite_table_schemas, SettingsTables
@@ -112,22 +112,39 @@ class ThreedimodelSqlite(ThreedimodelSqliteBase):
         self._aggregation_settings = None
 
     @property
-    def global_settings(self):
+    def global_settings(self) -> Dict:
+        """
+        :raises RowDoesNotExistError if the given table row does not exist
+        """
+
         if not self._global_settings:
             self._global_settings = self._get_global_settings()
         return self._global_settings
 
     @property
-    def numerical_settings(self):
+    def numerical_settings(self) -> Dict:
+        """
+        :raises RowDoesNotExistError if the given table row does not exist
+        """
         if not self._numerical_settings:
             self._numerical_settings = self._get_numerical_settings()
         return self._numerical_settings
 
     @property
-    def aggregation_settings(self):
+    def aggregation_settings(self) -> Dict:
         if not self._aggregation_settings:
             self._aggregation_settings = self._get_aggregation_settings()
         return self._aggregation_settings
+
+    def get_global_settings_ids(self) -> Dict:
+        statement = f"SELECT id, name FROM {SettingsTables.global_settings.value}"
+        self.cursor.execute(statement)
+        return dict(self.cursor.fetchall())
+        # d = dict()
+        # for entry in self.cursor.fetchall():
+        #     d[i] = dict(entry)
+        # return d
+        # return [x["id"] for x in self.cursor.fetchall()]
 
     def _get_global_settings(self) -> Dict:
         """
