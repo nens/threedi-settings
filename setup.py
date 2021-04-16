@@ -61,6 +61,6 @@ setup(
         'api': api_requirements
     },
     url='https://github.com/nens/threedi-settings',
-    version='0.0.4.dev0',
+    version='0.0.4',
     zip_safe=False,
 )

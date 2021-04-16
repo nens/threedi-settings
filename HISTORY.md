@@ -1,6 +1,6 @@
 ## History
 
-0.0.4 (unreleased)
+0.0.4 (2021-04-16)
 ------------------
 
 - Added export from sqlite file command.
