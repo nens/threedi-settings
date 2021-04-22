@@ -85,6 +85,11 @@ class ResponseTree:
 
     def __init__(self, resp: SimulationSettingsOverview):
         self.resp = resp
+        try:
+            self.simlation_id = self.resp.general_settings.simulation_id
+        except AttributeError:
+            raise AttributeError("Response does not contain a simulation ID")
+
         self.label = Panel(
             f"Settings for simulation {self.resp.general_settings.simulation_id}",
             style="bold green",

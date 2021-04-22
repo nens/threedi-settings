@@ -9,7 +9,7 @@ except ImportError:
     raise ImportError(
         "You need to install the extra 'cmd', e.g. pip install threedi-settings[cmd]"  # noqa
     )
-
+from openapi_client.models import SimulationSettingsOverview
 from threedi_settings.threedimodel_config import ThreedimodelIni
 from threedi_settings.threedimodel_config import AggregationIni
 from threedi_settings.http.api_clients import OpenAPINumericalSettings
@@ -35,7 +35,7 @@ def _create(
     source: SourceTypes,
     settings: Dict,
     aggregations: Optional[Dict] = None
-):
+) -> Optional[SimulationSettingsOverview]:
     """create all API settings resources"""
     OpenAPINumericalSettings(simulation_id, settings, source).create()
     OpenAPITimeStepSettings(simulation_id, settings, source).create()
@@ -130,8 +130,13 @@ def export_from_sqlite(
         settings,
         aggr
     )
-    rt = ResponseTree(resp)
-    rt.show()
+    if not resp:
+        raise typer.Exit(1)
+    try:
+        rt = ResponseTree(resp)
+        rt.show()
+    except AttributeError as err:
+        console.print(f"[bold red]{err}")
 
 
 if __name__ == "__main__":
