@@ -1,6 +1,6 @@
 ## History
 
-0.0.5 (unreleased)
+0.0.5 (2021-04-22)
 ------------------
 
 - Update readme with required env variables.
