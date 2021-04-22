@@ -3,7 +3,9 @@
 0.0.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Update readme with required env variables.
+
+- Fix for export edge cases.
 
 
 0.0.4 (2021-04-16)
