@@ -59,7 +59,7 @@ def simulation_overview():
                                'method': 'cum',
                                'name': None,
                                'url': 'http://localhost:8000/v3.0/simulations/3/settings/aggregation/23/'}],
-     'general_settings': {'id': 7,
+     'physical_settings': {'id': 7,
                           'simulation_id': 3,
                           'use_advection_1d': 1,
                           'use_advection_2d': 1},
@@ -97,9 +97,9 @@ def simulation_overview():
     aggr_data = data.pop("aggregation_settings")
     agg_list = [AggregationSettings(**entry) for entry in aggr_data]
     data["aggregation_settings"] = agg_list
-    gen_data = data.pop("general_settings")
+    gen_data = data.pop("physical_settings")
     gen_sett = PhysicalSettings(**gen_data)
-    data["general_settings"] = gen_sett
+    data["physical_settings"] = gen_sett
     ts_data = data.pop("time_step_settings")
     ts_sett = TimeStepSettings(**ts_data)
     data["time_step_settings"] = ts_sett

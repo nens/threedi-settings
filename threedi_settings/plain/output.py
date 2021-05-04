@@ -4,7 +4,7 @@ from configparser import ConfigParser
 from pathlib import Path
 
 from threedi_settings.mappings import (
-    general_settings_map,
+    physical_settings_map,
     time_step_settings_map,
     numerical_settings_map,
     aggregation_settings_map,
@@ -58,7 +58,7 @@ class SimulationConfigWriter:
                 self.simulation_config.sim_uid,
             )
 
-        self._add(general_settings_map, self.simulation_config.general_config)
+        self._add(physical_settings_map, self.simulation_config.general_config)
         self._add(
             time_step_settings_map, self.simulation_config.time_step_config
         )

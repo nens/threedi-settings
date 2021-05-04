@@ -22,7 +22,7 @@ except ImportError:
     raise ImportError(msg)
 
 from threedi_settings.mappings import (
-    general_settings_map,
+    physical_settings_map,
     time_step_settings_map,
     numerical_settings_map,
     aggregation_settings_map,
@@ -155,7 +155,7 @@ class BaseOpenAPI(ABC, OpenApiSimulationClient):
 class OpenAPIPhysicalSettings(BaseOpenAPI):
     def __init__(self, simulation_id: int, config: Dict, settings_source: SourceTypes):
         super().__init__(
-            simulation_id, config, PhysicalSettings, general_settings_map, settings_source
+            simulation_id, config, PhysicalSettings, physical_settings_map, settings_source
         )
 
     @property
@@ -280,7 +280,7 @@ class OpenAPISimulationSettings(OpenApiSimulationClient):
             return
 
         attr_names = [
-            "general_settings",
+            "physical_settings",
             "time_step_settings",
             "numerical_settings",
         ]
@@ -296,8 +296,8 @@ class OpenAPISimulationSettings(OpenApiSimulationClient):
             uid = str(tmp_d.pop("id"))
             sim_uid = str(tmp_d.pop("simulation_id"))
             d[name] = tmp_d
-        general_settings = GeneralSimulationConfig(
-            uid=uid, sim_uid=sim_uid, **d["general_settings"]
+        physical_settings = GeneralSimulationConfig(
+            uid=uid, sim_uid=sim_uid, **d["physical_settings"]
         )
         time_step_settings = TimeStepConfig(
             uid=uid, sim_uid=sim_uid, **d["time_step_settings"]
@@ -309,7 +309,7 @@ class OpenAPISimulationSettings(OpenApiSimulationClient):
         self._simulation_config = SimulationConfig(
             uid=uid,
             sim_uid=sim_uid,
-            general_config=general_settings,
+            general_config=physical_settings,
             time_step_config=time_step_settings,
             numerical_config=numerical_settings,
             aggregation_config=aggregation_settings,

@@ -79,7 +79,7 @@ def test_openapi__create_method_error(mock_create_method, model_ini):
 
 
 @patch.object(OpenAPIPhysicalSettings, 'create')
-def test_create_general_settings_resource(mock_create, model_ini):
+def test_create_physical_settings_resource(mock_create, model_ini):
     config = model_ini.as_dict()
     client = OpenAPIPhysicalSettings(1, config, SourceTypes.ini_file)
 
@@ -89,7 +89,7 @@ def test_create_general_settings_resource(mock_create, model_ini):
 
 
 @patch.object(OpenAPIPhysicalSettings, 'create')
-def test_create_general_settings_resource_error(mock_create, model_ini):
+def test_create_physical_settings_resource_error(mock_create, model_ini):
     config = model_ini.as_dict()
     client = OpenAPIPhysicalSettings(1, config, SourceTypes.ini_file)
 
