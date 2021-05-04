@@ -12,7 +12,7 @@ class BaseConfig:
 
 
 @dataclass
-class GeneralSimulationConfig(BaseConfig):
+class PhysicalSimulationConfig(BaseConfig):
     use_advection_1d: int
     use_advection_2d: int
 
@@ -62,7 +62,7 @@ class AggregationConfig(BaseConfig):
 
 @dataclass
 class SimulationConfig(BaseConfig):
-    general_config: GeneralSimulationConfig
+    physical_config: PhysicalSimulationConfig
     time_step_config: TimeStepConfig
     numerical_config: NumericalConfig
     aggregation_config: Optional[List[AggregationConfig]] = field(

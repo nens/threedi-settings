@@ -256,7 +256,7 @@ swagger_definitions_map = {
 }
 
 swagger_url_map = {
-    "PhysicalSettings": "/simulations/{simulation_pk}/settings/general/",
+    "PhysicalSettings": "/simulations/{simulation_pk}/settings/physical/",
     "NumericalSettings": "/simulations/{simulation_pk}/settings/numerical/",
     "TimeStepSettings": "/simulations/{simulation_pk}/settings/time_step/",
     "AggregationSettings": "/simulations/{simulation_pk}/settings/aggregation/",

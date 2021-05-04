@@ -46,7 +46,7 @@ class SetttingsTreeBase(TreeMixin):
 class PhysicalSettingsTree(SetttingsTreeBase):
 
     def __init__(self, data):
-        super().__init__(f"general settings", data)
+        super().__init__(f"physical settings", data)
 
 
 class TimeStepSettingsTree(SetttingsTreeBase):

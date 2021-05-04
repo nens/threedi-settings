@@ -58,7 +58,7 @@ class SimulationConfigWriter:
                 self.simulation_config.sim_uid,
             )
 
-        self._add(physical_settings_map, self.simulation_config.general_config)
+        self._add(physical_settings_map, self.simulation_config.physical_config)
         self._add(
             time_step_settings_map, self.simulation_config.time_step_config
         )

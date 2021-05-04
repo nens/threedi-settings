@@ -30,7 +30,7 @@ from threedi_settings.mappings import (
 from threedi_settings.models import (
     NumericalConfig,
     TimeStepConfig,
-    GeneralSimulationConfig,
+    PhysicalSimulationConfig,
     AggregationConfig,
     SimulationConfig,
     SourceTypes,
@@ -160,7 +160,7 @@ class OpenAPIPhysicalSettings(BaseOpenAPI):
 
     @property
     def create_method_name(self):
-        return "simulations_settings_general_create"
+        return "simulations_settings_physical_create"
 
 
 class OpenAPITimeStepSettings(BaseOpenAPI):
@@ -296,7 +296,7 @@ class OpenAPISimulationSettings(OpenApiSimulationClient):
             uid = str(tmp_d.pop("id"))
             sim_uid = str(tmp_d.pop("simulation_id"))
             d[name] = tmp_d
-        physical_settings = GeneralSimulationConfig(
+        physical_settings = PhysicalSimulationConfig(
             uid=uid, sim_uid=sim_uid, **d["physical_settings"]
         )
         time_step_settings = TimeStepConfig(
@@ -309,7 +309,7 @@ class OpenAPISimulationSettings(OpenApiSimulationClient):
         self._simulation_config = SimulationConfig(
             uid=uid,
             sim_uid=sim_uid,
-            general_config=physical_settings,
+            physical_config=physical_settings,
             time_step_config=time_step_settings,
             numerical_config=numerical_settings,
             aggregation_config=aggregation_settings,
