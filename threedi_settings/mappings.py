@@ -249,14 +249,14 @@ settings_map = {
 
 
 swagger_definitions_map = {
-    "GeneralSettings": general_settings_map,
+    "PhysicalSettings": general_settings_map,
     "NumericalSettings": numerical_settings_map,
     "TimeStepSettings": time_step_settings_map,
     "AggregationSettings": aggregation_settings_map,
 }
 
 swagger_url_map = {
-    "GeneralSettings": "/simulations/{simulation_pk}/settings/general/",
+    "PhysicalSettings": "/simulations/{simulation_pk}/settings/general/",
     "NumericalSettings": "/simulations/{simulation_pk}/settings/numerical/",
     "TimeStepSettings": "/simulations/{simulation_pk}/settings/time_step/",
     "AggregationSettings": "/simulations/{simulation_pk}/settings/aggregation/",

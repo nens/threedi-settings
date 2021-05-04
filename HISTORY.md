@@ -3,7 +3,7 @@
 0.0.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Renamed general settings to physical settings
 
 
 0.0.5 (2021-04-22)

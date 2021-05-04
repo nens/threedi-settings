@@ -9,7 +9,7 @@ from pathlib import PurePosixPath
 
 
 try:
-    from openapi_client.models import GeneralSettings
+    from openapi_client.models import PhysicalSettings
     from openapi_client.models import TimeStepSettings
     from openapi_client.models import NumericalSettings
     from openapi_client.models import AggregationSettings
@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 
 OpenApiSettingsModel = Union[
-    GeneralSettings,
+    PhysicalSettings,
     TimeStepSettings,
     NumericalSettings
 ]
@@ -152,10 +152,10 @@ class BaseOpenAPI(ABC, OpenApiSimulationClient):
         return resp
 
 
-class OpenAPIGeneralSettings(BaseOpenAPI):
+class OpenAPIPhysicalSettings(BaseOpenAPI):
     def __init__(self, simulation_id: int, config: Dict, settings_source: SourceTypes):
         super().__init__(
-            simulation_id, config, GeneralSettings, general_settings_map, settings_source
+            simulation_id, config, PhysicalSettings, general_settings_map, settings_source
         )
 
     @property

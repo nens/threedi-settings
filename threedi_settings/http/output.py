@@ -9,7 +9,7 @@ from urllib.parse import unquote, urlparse
 from pathlib import PurePosixPath
 
 try:
-    from openapi_client.models import GeneralSettings
+    from openapi_client.models import PhysicalSettings
     from openapi_client.models import TimeStepSettings
     from openapi_client.models import NumericalSettings
     from openapi_client.models import AggregationSettings

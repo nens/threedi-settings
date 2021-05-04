@@ -43,7 +43,7 @@ class SetttingsTreeBase(TreeMixin):
         console.print(self.tree)
 
 
-class GeneralSettingsTree(SetttingsTreeBase):
+class PhysicalSettingsTree(SetttingsTreeBase):
 
     def __init__(self, data):
         super().__init__(f"general settings", data)
@@ -98,7 +98,7 @@ class ResponseTree:
         )
 
     def general_settings(self):
-        gt = GeneralSettingsTree(self.resp.general_settings)
+        gt = PhysicalSettingsTree(self.resp.general_settings)
         gt.add_branch()
         return gt
 

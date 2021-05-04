@@ -14,7 +14,7 @@ from threedi_settings.threedimodel_config import ThreedimodelIni
 from threedi_settings.threedimodel_config import AggregationIni
 from threedi_settings.http.api_clients import OpenAPINumericalSettings
 from threedi_settings.http.api_clients import OpenAPITimeStepSettings
-from threedi_settings.http.api_clients import OpenAPIGeneralSettings
+from threedi_settings.http.api_clients import OpenAPIPhysicalSettings
 from threedi_settings.http.api_clients import OpenAPIAggregationSettings
 from threedi_settings.http.api_clients import OpenAPISimulationSettings
 from threedi_settings.threedimodel_config import ThreedimodelSqlite, RowDoesNotExistError
@@ -39,7 +39,7 @@ def _create(
     """create all API settings resources"""
     OpenAPINumericalSettings(simulation_id, settings, source).create()
     OpenAPITimeStepSettings(simulation_id, settings, source).create()
-    OpenAPIGeneralSettings(simulation_id, settings, source).create()
+    OpenAPIPhysicalSettings(simulation_id, settings, source).create()
     if aggregations:
         OpenAPIAggregationSettings(simulation_id, aggregations).create()
     sim_settings = OpenAPISimulationSettings(simulation_id)
