@@ -1,6 +1,6 @@
 ## History
 
-0.0.6 (unreleased)
+0.0.6 (2021-05-05)
 ------------------
 
 - Renamed general settings to physical settings
