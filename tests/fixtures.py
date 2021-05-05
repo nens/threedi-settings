@@ -6,7 +6,7 @@ from threedi_settings.threedimodel_config import ThreedimodelIni
 from threedi_settings.threedimodel_config import AggregationIni
 
 from threedi_settings.models import (
-    GeneralSimulationConfig,
+    PhysicalSimulationConfig,
     TimeStepConfig,
     AggregationConfig,
     NumericalConfig,
@@ -33,9 +33,9 @@ def simulation_config():
     yield SimulationConfig(
         uid='1',
         sim_uid='1',
-        general_config=GeneralSimulationConfig(uid='1', sim_uid='1',
-                                               use_advection_1d=1,
-                                               use_advection_2d=1),
+        physical_config=PhysicalSimulationConfig(uid='1', sim_uid='1',
+                                                 use_advection_1d=1,
+                                                 use_advection_2d=1),
         time_step_config=TimeStepConfig(
             uid='1',
             sim_uid='1',
@@ -107,9 +107,9 @@ def simulation_config_no_aggregation():
     yield SimulationConfig(
         uid='1',
         sim_uid='1',
-        general_config=GeneralSimulationConfig(uid='1', sim_uid='1',
-                                               use_advection_1d=1,
-                                               use_advection_2d=1),
+        physical_config=PhysicalSimulationConfig(uid='1', sim_uid='1',
+                                                 use_advection_1d=1,
+                                                 use_advection_2d=1),
         time_step_config=TimeStepConfig(
             uid='1',
             sim_uid='1',

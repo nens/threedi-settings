@@ -9,7 +9,7 @@ from urllib.parse import unquote, urlparse
 from pathlib import PurePosixPath
 
 try:
-    from openapi_client.models import GeneralSettings
+    from openapi_client.models import PhysicalSettings
     from openapi_client.models import TimeStepSettings
     from openapi_client.models import NumericalSettings
     from openapi_client.models import AggregationSettings
@@ -22,7 +22,7 @@ except ImportError:
     raise ImportError(msg)
 
 from threedi_settings.mappings import (
-    general_settings_map,
+    physical_settings_map,
     time_step_settings_map,
     numerical_settings_map,
     aggregation_settings_map,
@@ -65,7 +65,7 @@ class OpenAPISimulationSettingsWriter(OpenAPISimulationSettings):
                 "Cannot create ini file, could not fetch data from API"
             )
             return
-        self._add(general_settings_map, self.settings.general_settings)
+        self._add(physical_settings_map, self.settings.physical_settings)
         self._add(time_step_settings_map, self.settings.time_step_settings)
         self._add(numerical_settings_map, self.settings.numerical_settings)
         with self.ini_output_file.open("w") as configfile:

@@ -6,11 +6,11 @@ from threedi_settings.threedimodel_config import AggregationIni
 from threedi_settings.models import SimulationConfig
 from threedi_settings.http.api_clients import OpenAPINumericalSettings
 from threedi_settings.http.api_clients import OpenAPITimeStepSettings
-from threedi_settings.http.api_clients import OpenAPIGeneralSettings
+from threedi_settings.http.api_clients import OpenAPIPhysicalSettings
 from threedi_settings.http.api_clients import OpenApiSettingsModel
 from threedi_settings.http.api_clients import OpenAPIAggregationSettings
 from threedi_settings.http.api_clients import OpenAPISimulationSettings
-from openapi_client.models import GeneralSettings
+from openapi_client.models import PhysicalSettings
 from openapi_client.models import TimeStepSettings
 from openapi_client.models import NumericalSettings
 from openapi_client.models import AggregationSettings
@@ -27,14 +27,14 @@ def test_openapi_settings_clients(model_ini):
     # smoke tests
     config = model_ini.as_dict()
     clients = [
-        OpenAPIGeneralSettings(1, config, SourceTypes.ini_file),
+        OpenAPIPhysicalSettings(1, config, SourceTypes.ini_file),
         OpenAPINumericalSettings(1, config, SourceTypes.ini_file),
         OpenAPITimeStepSettings(1, config, SourceTypes.ini_file),
     ]
     for client in clients:
         assert isinstance(
             client.instance, (
-                GeneralSettings,
+                PhysicalSettings,
                 TimeStepSettings,
                 NumericalSettings)
         )
@@ -42,7 +42,7 @@ def test_openapi_settings_clients(model_ini):
 
 def test_openapi_name_conversions(model_ini):
     config = model_ini.as_dict()
-    client = OpenAPIGeneralSettings(1, config, SourceTypes.ini_file)
+    client = OpenAPIPhysicalSettings(1, config, SourceTypes.ini_file)
     # should have attributes use_advection_2d/1d now
     assert client.instance.use_advection_2d == 0  # from ini
     assert client.instance.use_advection_1d == 0  # from ini
@@ -78,20 +78,20 @@ def test_openapi__create_method_error(mock_create_method, model_ini):
         client._create_method()
 
 
-@patch.object(OpenAPIGeneralSettings, 'create')
-def test_create_general_settings_resource(mock_create, model_ini):
+@patch.object(OpenAPIPhysicalSettings, 'create')
+def test_create_physical_settings_resource(mock_create, model_ini):
     config = model_ini.as_dict()
-    client = OpenAPIGeneralSettings(1, config, SourceTypes.ini_file)
+    client = OpenAPIPhysicalSettings(1, config, SourceTypes.ini_file)
 
     mock_create.return_value = client.instance
     resp = client.create()
     assert resp == client.instance
 
 
-@patch.object(OpenAPIGeneralSettings, 'create')
-def test_create_general_settings_resource_error(mock_create, model_ini):
+@patch.object(OpenAPIPhysicalSettings, 'create')
+def test_create_physical_settings_resource_error(mock_create, model_ini):
     config = model_ini.as_dict()
-    client = OpenAPIGeneralSettings(1, config, SourceTypes.ini_file)
+    client = OpenAPIPhysicalSettings(1, config, SourceTypes.ini_file)
 
     mock_create.side_effect = ApiException
     # create, side effect ApiExc, AttrErr

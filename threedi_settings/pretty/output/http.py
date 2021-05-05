@@ -43,10 +43,10 @@ class SetttingsTreeBase(TreeMixin):
         console.print(self.tree)
 
 
-class GeneralSettingsTree(SetttingsTreeBase):
+class PhysicalSettingsTree(SetttingsTreeBase):
 
     def __init__(self, data):
-        super().__init__(f"general settings", data)
+        super().__init__(f"physical settings", data)
 
 
 class TimeStepSettingsTree(SetttingsTreeBase):
@@ -86,19 +86,19 @@ class ResponseTree:
     def __init__(self, resp: SimulationSettingsOverview):
         self.resp = resp
         try:
-            self.simlation_id = self.resp.general_settings.simulation_id
+            self.simlation_id = self.resp.physical_settings.simulation_id
         except AttributeError:
             raise AttributeError("Response does not contain a simulation ID")
 
         self.label = Panel(
-            f"Settings for simulation {self.resp.general_settings.simulation_id}",
+            f"Settings for simulation {self.resp.physical_settings.simulation_id}",
             style="bold green",
             border_style="green",
             title="+++"
         )
 
-    def general_settings(self):
-        gt = GeneralSettingsTree(self.resp.general_settings)
+    def physical_settings(self):
+        gt = PhysicalSettingsTree(self.resp.physical_settings)
         gt.add_branch()
         return gt
 
@@ -118,7 +118,7 @@ class ResponseTree:
         return aggr_sett
 
     def show(self):
-        self.general_settings()
+        self.physical_settings()
         self.time_step_settings()
         self.numerical_settings()
         t = self.aggregation_settings()

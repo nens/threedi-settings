@@ -9,7 +9,7 @@ from pathlib import PurePosixPath
 
 
 try:
-    from openapi_client.models import GeneralSettings
+    from openapi_client.models import PhysicalSettings
     from openapi_client.models import TimeStepSettings
     from openapi_client.models import NumericalSettings
     from openapi_client.models import AggregationSettings
@@ -22,7 +22,7 @@ except ImportError:
     raise ImportError(msg)
 
 from threedi_settings.mappings import (
-    general_settings_map,
+    physical_settings_map,
     time_step_settings_map,
     numerical_settings_map,
     aggregation_settings_map,
@@ -30,7 +30,7 @@ from threedi_settings.mappings import (
 from threedi_settings.models import (
     NumericalConfig,
     TimeStepConfig,
-    GeneralSimulationConfig,
+    PhysicalSimulationConfig,
     AggregationConfig,
     SimulationConfig,
     SourceTypes,
@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 
 OpenApiSettingsModel = Union[
-    GeneralSettings,
+    PhysicalSettings,
     TimeStepSettings,
     NumericalSettings
 ]
@@ -152,15 +152,15 @@ class BaseOpenAPI(ABC, OpenApiSimulationClient):
         return resp
 
 
-class OpenAPIGeneralSettings(BaseOpenAPI):
+class OpenAPIPhysicalSettings(BaseOpenAPI):
     def __init__(self, simulation_id: int, config: Dict, settings_source: SourceTypes):
         super().__init__(
-            simulation_id, config, GeneralSettings, general_settings_map, settings_source
+            simulation_id, config, PhysicalSettings, physical_settings_map, settings_source
         )
 
     @property
     def create_method_name(self):
-        return "simulations_settings_general_create"
+        return "simulations_settings_physical_create"
 
 
 class OpenAPITimeStepSettings(BaseOpenAPI):
@@ -280,7 +280,7 @@ class OpenAPISimulationSettings(OpenApiSimulationClient):
             return
 
         attr_names = [
-            "general_settings",
+            "physical_settings",
             "time_step_settings",
             "numerical_settings",
         ]
@@ -296,8 +296,8 @@ class OpenAPISimulationSettings(OpenApiSimulationClient):
             uid = str(tmp_d.pop("id"))
             sim_uid = str(tmp_d.pop("simulation_id"))
             d[name] = tmp_d
-        general_settings = GeneralSimulationConfig(
-            uid=uid, sim_uid=sim_uid, **d["general_settings"]
+        physical_settings = PhysicalSimulationConfig(
+            uid=uid, sim_uid=sim_uid, **d["physical_settings"]
         )
         time_step_settings = TimeStepConfig(
             uid=uid, sim_uid=sim_uid, **d["time_step_settings"]
@@ -309,7 +309,7 @@ class OpenAPISimulationSettings(OpenApiSimulationClient):
         self._simulation_config = SimulationConfig(
             uid=uid,
             sim_uid=sim_uid,
-            general_config=general_settings,
+            physical_config=physical_settings,
             time_step_config=time_step_settings,
             numerical_config=numerical_settings,
             aggregation_config=aggregation_settings,
