@@ -31,6 +31,7 @@ class NumericalConfig(BaseConfig):
     cfl_strictness_factor_1d: float
     cfl_strictness_factor_2d: float
     convergence_cg: float
+    convergence_eps: float
     flow_direction_threshold: float
     friction_shallow_water_depth_correction: int
     general_numerical_threshold: float

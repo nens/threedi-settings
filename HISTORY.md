@@ -3,7 +3,7 @@
 0.0.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added `convergence_eps`
 
 
 0.0.6 (2021-05-05)

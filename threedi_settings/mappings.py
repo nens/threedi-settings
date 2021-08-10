@@ -103,6 +103,12 @@ numerical_settings_map = {
         FieldInfoSqlite("convergence_cg", float,
                         SettingsTables.numerical_settings.value),
     ],
+    "convergence_eps": [
+        FieldInfoIni("convergence_eps", float, "numerics"),
+        FieldInfoAPI("convergence_eps", float, 1.0e-5),
+        FieldInfoSqlite("convergence_eps", float,
+                        SettingsTables.numerical_settings.value),
+    ],
     "friction_shallow_water_depth_correction": [
         FieldInfoIni(
             "friction_shallow_water_correction", int, "physical_attributes"
