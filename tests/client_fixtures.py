@@ -1,8 +1,8 @@
-from openapi_client.models import SimulationSettingsOverview
-from openapi_client.models import AggregationSettings
-from openapi_client.models import PhysicalSettings
-from openapi_client.models import TimeStepSettings
-from openapi_client.models import NumericalSettings
+from threedi_api_client.openapi.models import SimulationSettingsOverview
+from threedi_api_client.openapi.models import AggregationSettings
+from threedi_api_client.openapi.models import PhysicalSettings
+from threedi_api_client.openapi.models import TimeStepSettings
+from threedi_api_client.openapi.models import NumericalSettings
 
 import pytest
 
@@ -66,6 +66,7 @@ def simulation_overview():
      'numerical_settings': {'cfl_strictness_factor_1d': 1.0,
                             'cfl_strictness_factor_2d': 1.0,
                             'convergence_cg': 1e-09,
+                            'convergence_eps': 1e-05,
                             'flooding_threshold': 0.01,
                             'flow_direction_threshold': 1e-05,
                             'friction_shallow_water_depth_correction': 0,
