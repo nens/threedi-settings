@@ -1,5 +1,11 @@
 ## threedi-settings
 
+**Stopped using this package and archived from 24-10-2022.**
+
+
+
+
+
 
 Convert legacy model settings (V2) files to API V3 resources.
 
